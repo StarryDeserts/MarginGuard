@@ -4,17 +4,19 @@ Use this checklist before recording the Overflow demo video or doing a live judg
 
 Date: `2026-05-01`
 
-Commit: `906842a`
+Submission commit: `fill after final push`
+
+Latest planning commit: `de01843`
 
 Branch: `main`
 
 GitHub repo URL: `https://github.com/StarryDeserts/MarginGuard`
 
-Working tree status: `Dirty - Round 8 documentation/evidence changes are uncommitted`
+Working tree status: `Final response records post-push working tree status`
 
 Upstream status: `Tracks origin/main; no ahead/behind marker reported by git status -sb`
 
-Final build date: `2026-05-01 18:06:58 +08:00`
+Final build date: `2026-05-02 00:08:26 +08:00`
 
 Release artifact / zip name: `N/A — static build output in apps/web/dist`
 
@@ -22,27 +24,28 @@ Deployed URL: `________________`
 
 Tester: `________________`
 
-## Round 8 Submission Lock Record
+## Round 9 Submission Lock Record
 
 Use only these status values: `Not tested`, `Passed`, `Failed`, `N/A`.
 
 | Item | Status | Evidence / notes |
 |---|---|---|
 | GitHub repo URL recorded | Passed | `https://github.com/StarryDeserts/MarginGuard`. |
-| Final commit hash recorded | Passed | `906842a`. |
+| Final commit hash recorded | Not tested | Fill after final push; final response reports the actual pushed commit. |
 | Branch recorded | Passed | `main`. |
-| Working tree clean or intentionally accepted | Failed | Dirty after Round 8 docs/evidence changes. Commit or explicitly accept dirty state before final submission label can be upgraded. |
-| Public build live flag state | Passed | Builds ran with `VITE_ENABLE_LIVE_ADD_COLLATERAL=false` set in the same PowerShell environment. |
-| App-level safe build completed | Passed | `pnpm -C apps/web build` exited 0 with live flag forced to false. |
-| Root safe build completed | Passed | `pnpm build` exited 0 with live flag forced to false. |
-| Safety scan completed | Passed | `pnpm verify:submission-safety` passed and scanned 184 text files. |
-| Static preview route smoke | Passed | Static preview returned HTTP 200 for `/`, `/dashboard`, `/rescue`, `/demo`, `/settings`. |
+| Working tree clean or intentionally accepted | Not tested | Pending final Round 9 commit/push and final git snapshot. |
+| Public build live flag state | Passed | App and root builds ran with `VITE_ENABLE_LIVE_ADD_COLLATERAL=false` in the same PowerShell command. |
+| App-level safe build completed | Passed | `pnpm -C apps/web build` exited 0; Vite large chunk warning is non-blocking. |
+| Root safe build completed | Passed | `pnpm build` exited 0; Vite large chunk warning is non-blocking. |
+| Safety scan completed | Passed | `pnpm verify:submission-safety` passed and scanned 185 text files before final doc result update; final response records post-doc safety rerun. |
+| Static preview route smoke | Passed | Static preview returned HTTP 200 for `/`, `/dashboard`, `/rescue`, `/demo`, `/settings`; visual/browser wallet QA remains manual. |
 | Deployment URL recorded | Not tested | Fill only after public static deployment exists. |
-| Screenshot evidence captured | Not tested | Full manager IDs must be redacted. |
+| User-provided screenshot QA reviewed | Passed | User-provided screenshots reviewed in planning chat: no-debt fix visually confirmed. |
+| Final submission screenshots captured | Not tested | Full manager IDs must be redacted; record uploaded URLs or repo-relative paths only. |
 | Demo video captured | Not tested | No live success claim without digest. |
 | Live Add Collateral transaction submitted | N/A | N/A — no live Add Collateral transaction submitted. |
 | Real transaction digest | N/A | N/A — no live Add Collateral transaction submitted. |
-| Final go/no-go label | Passed | `Ready after manual QA / version lock`. |
+| Final go/no-go label | Not tested | Pending commit/push, deployment/screenshots/video evidence, and final git snapshot. |
 
 ## Command Checklist
 
@@ -192,7 +195,7 @@ Do not force live execution if no safe action-needed manager exists. Use Demo Mo
 - [ ] No-rescue-needed block for current healthy manager if used.
 - [ ] Rescue Simulator shows `Real DeepBook baseline`, `Partial DeepBook baseline`, or clearly simulated fallback.
 - [ ] No-debt screenshots show `No debt`, `N/A`, or `No active liquidation risk`, not `1000.00` or `Infinity`.
-- [ ] Demo Mode Warning/action-needed state.
+- [ ] Demo Mode simulated Warning/action-needed state.
 - [ ] Demo Mode labels `Real DeepBook baseline`, `Simulated shock`, `Estimate`, `App target`, and `Demo fallback` where applicable.
 - [ ] Public/default build shows live signing disabled or equivalent safe copy.
 - [ ] Transaction Review warnings.
@@ -224,4 +227,4 @@ Go only if:
 - [ ] Docs match the actual app.
 - [ ] No public material overclaims live execution, automatic protection, or background monitoring.
 
-Decision: `Ready for demo submission / Ready after manual QA / version lock / Not ready due to blocker`
+Decision: `Ready for demo submission / Ready after manual QA / deployment / Not ready due to blocker`

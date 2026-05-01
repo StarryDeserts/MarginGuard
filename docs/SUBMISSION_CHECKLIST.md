@@ -100,4 +100,4 @@ Use this checklist before submitting MarginGuard to Sui 2026 Overflow.
 - [ ] `pnpm -C apps/web build` passes.
 - [ ] Root `pnpm typecheck`, `pnpm lint`, `pnpm test`, and `pnpm build` pass.
 - [ ] Known limitations are documented.
-- [ ] Final go/no-go label is one of `Ready for demo submission`, `Ready after manual QA / version lock`, or `Not ready due to blocker`.
+- [ ] Final go/no-go label is one of `Ready for demo submission`, `Ready after manual QA / deployment`, or `Not ready due to blocker`.

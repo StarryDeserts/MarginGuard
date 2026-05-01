@@ -35,9 +35,9 @@ It helps a user manually import a DeepBook Margin Manager, read current risk thr
 2. Connect wallet.
 3. Import or select a SUI/USDC Margin Manager.
 4. Show the real DeepBook Risk Snapshot if available.
-5. If the current manager is healthy, show the no-rescue-needed gate.
+5. If the current manager is healthy or has no active debt, show the no-rescue-needed gate.
 6. Switch to Demo Mode and apply a simulated SUI price shock.
-7. Show Warning/action-needed risk state and three rescue options.
+7. Show the simulated Warning/action-needed risk state and three rescue options.
 8. Select Add Collateral and open Transaction Review.
 9. Explain that wallet-signed execution is available only under live QA conditions: live flag, real action-needed DeepBook state, acknowledgement, and re-read-before-sign.
 10. Use simulated result unless a real transaction digest exists.

@@ -37,6 +37,8 @@ export function RescuePlanCard({
 }: RescuePlanCardProps) {
   const Icon = iconMap[plan.type]
   const isP0 = plan.priority === 'P0'
+  const priorityBadgeLabel = plan.priorityDisplayLabel ?? plan.priority
+  const priorityBadgeVariant = plan.priorityDisplayLabel ? 'info' : isP0 ? 'p0' : 'p1'
   const reviewButtonLabel = plan.type === 'ADD_COLLATERAL' ? plan.ctaLabel : 'Not wired'
 
   return (
@@ -47,7 +49,7 @@ export function RescuePlanCard({
     >
       <div className="mb-5 flex flex-wrap items-center gap-2">
         {plan.recommended ? <Badge variant="recommended">Recommended</Badge> : null}
-        <Badge variant={isP0 ? 'p0' : 'p1'}>{plan.priority}</Badge>
+        <Badge variant={priorityBadgeVariant}>{priorityBadgeLabel}</Badge>
         <Badge variant={isP0 ? 'info' : 'p1'}>{plan.subtitle}</Badge>
       </div>
       <div className="flex items-start gap-4">

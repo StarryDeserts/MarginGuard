@@ -21,6 +21,7 @@ export type RescuePlan = {
   estimatedCostUsd?: number
   recommended: boolean
   priority: 'P0' | 'P1'
+  priorityDisplayLabel?: string
   executionMode: RescueExecutionMode
   label: string
   ctaLabel: string

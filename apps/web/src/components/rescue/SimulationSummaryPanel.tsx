@@ -14,11 +14,13 @@ type SimulationSummaryPanelProps = {
 }
 
 export function SimulationSummaryPanel({ plan, reviewDisabled, reviewDisabledReason, onReview, onBack }: SimulationSummaryPanelProps) {
+  const previewBadgeLabel = plan.priorityDisplayLabel ?? 'P1'
+
   return (
     <Card className="p-5">
       <div className="mb-5 flex items-center justify-between gap-3">
         <h2 className="text-xl font-semibold text-text-primary">Simulation Summary</h2>
-        {plan.recommended ? <Badge variant="recommended">Recommended</Badge> : <Badge variant="p1">P1</Badge>}
+        {plan.recommended ? <Badge variant="recommended">Recommended</Badge> : <Badge variant={plan.priorityDisplayLabel ? 'info' : 'p1'}>{previewBadgeLabel}</Badge>}
       </div>
       <div className="flex items-center gap-3">
         <Droplet className="h-9 w-9 text-sui-cyan" />

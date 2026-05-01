@@ -80,6 +80,7 @@ function downgradeRealBaselinePreviewPlans(plans: RescuePlan[], baseline: Manage
       ...plan,
       recommended: false,
       priority: 'P1' as const,
+      priorityDisplayLabel: isZeroDebt ? 'Simulated preview' : 'Preview only',
       subtitle: isZeroDebt ? 'Simulated what-if' : 'Healthy baseline',
       description: isZeroDebt
         ? 'Real manager has no active borrowed debt. This Add Collateral story is simulated only.'

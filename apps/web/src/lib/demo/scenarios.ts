@@ -42,7 +42,7 @@ export const demoScenarios: DemoScenario[] = [
 export const demoSteps: Array<{ id: DemoStep; title: string; description: string }> = [
   { id: 'IMPORT_MANAGER', title: 'Import Manager', description: 'Manual ID imported' },
   { id: 'PRICE_SHOCK', title: 'Price Shock', description: 'Market stress applied' },
-  { id: 'RISK_WARNING', title: 'Risk Warning', description: 'RR below target threshold' },
+  { id: 'RISK_WARNING', title: 'Simulated Risk Warning', description: 'Simulated threshold story' },
   { id: 'RESCUE_PLAN', title: 'Rescue Plan', description: 'Compare rescue options' },
   { id: 'REVIEW_PTB', title: 'Review PTB', description: 'Gated Add Collateral PTB path' },
   { id: 'RISK_IMPROVED', title: 'Expected Recovery', description: 'Expected RR projection back to target' },

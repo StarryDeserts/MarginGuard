@@ -94,6 +94,7 @@ describe('rescue simulator source model', () => {
     expect(model.statusCopy).toContain('Real manager has no active borrowed debt')
     expect(model.canOpenAddCollateralReview).toBe(false)
     expect(model.plans[0].recommended).toBe(false)
+    expect((model.plans[0] as { priorityDisplayLabel?: string }).priorityDisplayLabel).toBe('Simulated preview')
     expect(model.plans[0].label).toContain('Simulated what-if')
     expect(model.plans[0].subtitle).not.toBe('Best immediate rescue path')
   })
