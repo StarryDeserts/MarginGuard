@@ -1,0 +1,15 @@
+{
+  "name": "marginguard",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm -C apps/web dev",
+    "build": "pnpm -C apps/web build",
+    "lint": "pnpm -C apps/web lint",
+    "test": "pnpm -C apps/web test",
+    "typecheck": "pnpm -C apps/web typecheck",
+    "verify:submission-safety": "node scripts/verify-submission-safety.mjs"
+  },
+  "packageManager": "pnpm@10.23.0"
+}

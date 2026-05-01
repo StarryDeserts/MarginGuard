@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+@theme {
+  --color-guard-bg: #04101b;
+  --color-guard-bg-soft: #071827;
+  --color-guard-surface: #081a2c;
+  --color-guard-surface-2: #0b2035;
+  --color-guard-border: #22384e;
+  --color-guard-border-strong: #31516c;
+  --color-sui-cyan: #00d9ff;
+  --color-electric-blue: #1266ff;
+  --color-safe-green: #10b981;
+  --color-guarded-blue: #38bdf8;
+  --color-caution-yellow: #facc15;
+  --color-warning-orange: #f97316;
+  --color-danger-red: #ef4444;
+  --color-p1-purple: #8b5cf6;
+  --color-text-primary: #f7fbff;
+  --color-text-secondary: #aebed0;
+  --color-text-muted: #6f8195;
+  --font-sans: "IBM Plex Sans", "Aptos", "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", "Cascadia Mono", "Consolas", monospace;
+  --radius-card: 0.75rem;
+}
+
+:root {
+  color: #f7fbff;
+  background: #04101b;
+  font-family: "IBM Plex Sans", "Aptos", "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  background: #04101b;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(0, 217, 255, 0.14), transparent 28rem),
+    radial-gradient(circle at 88% 10%, rgba(18, 102, 255, 0.12), transparent 30rem),
+    linear-gradient(180deg, #04101b 0%, #061421 48%, #030b13 100%);
+}
+
+button,
+a,
+input,
+select {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  color: #03101a;
+  background: #00d9ff;
+}
+
+.focus-ring {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.focus-ring:focus-visible {
+  outline-color: #00d9ff;
+}
