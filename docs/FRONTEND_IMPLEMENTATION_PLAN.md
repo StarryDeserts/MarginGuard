@@ -135,7 +135,7 @@ Purpose:
 - show price shock;
 - show risk worsening;
 - show rescue plan;
-- optionally execute Add Collateral PTB.
+- optionally review the safety-gated Add Collateral PTB path.
 
 ### `/settings`
 

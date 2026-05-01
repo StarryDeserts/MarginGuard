@@ -86,4 +86,34 @@ describe('rescue plan simulation', () => {
     expect(getRescueActionability(partialState, 'partial-deepbook')).toBe('unavailable')
     expect(getAddCollateralRecommendation(partialState, 'partial-deepbook')).toBeUndefined()
   })
+
+  it('classifies partial DeepBook state with explicit zero raw debt as zero-debt display-only', () => {
+    const partialZeroDebtState = {
+      ...mockMarginState,
+      source: 'deepbook' as const,
+      isPartial: true,
+      riskRatio: 1000,
+      debtValueUsd: 0,
+      baseDebt: 0,
+      quoteDebt: 0,
+    }
+
+    expect(getRescueActionability(partialZeroDebtState, 'partial-deepbook')).toBe('zero-debt')
+    expect(getAddCollateralRecommendation(partialZeroDebtState, 'partial-deepbook')).toBeUndefined()
+  })
+
+  it('does not infer zero debt for partial DeepBook state with missing raw debt fields', () => {
+    const partialMissingDebtState = {
+      ...mockMarginState,
+      source: 'deepbook' as const,
+      isPartial: true,
+      riskRatio: 1000,
+      debtValueUsd: 0,
+      baseDebt: undefined,
+      quoteDebt: undefined,
+    }
+
+    expect(getRescueActionability(partialMissingDebtState, 'partial-deepbook')).toBe('unavailable')
+    expect(getAddCollateralRecommendation(partialMissingDebtState, 'partial-deepbook')).toBeUndefined()
+  })
 })

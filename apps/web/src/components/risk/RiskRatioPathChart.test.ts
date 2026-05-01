@@ -42,6 +42,8 @@ describe('RiskRatioPathChart view model', () => {
     expect(viewModel.kind).toBe('empty')
     if (viewModel.kind === 'empty') {
       expect(viewModel.message).toBe('Risk path is unavailable because this manager has no borrowed debt.')
+      expect(viewModel.currentRiskRatioDisplay).toBe('No debt')
+      expect(JSON.stringify(viewModel)).not.toContain('1000')
     }
   })
 

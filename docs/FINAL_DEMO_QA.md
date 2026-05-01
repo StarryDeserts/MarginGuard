@@ -2,17 +2,56 @@
 
 Use this checklist before recording the Overflow demo video or doing a live judge walkthrough.
 
-Date: `________________`
+Date: `2026-05-01`
 
-Commit: `________________`
+Commit: `906842a`
 
-Branch: `________________`
+Branch: `main`
+
+GitHub repo URL: `https://github.com/StarryDeserts/MarginGuard`
+
+Working tree status: `Dirty - Round 8 documentation/evidence changes are uncommitted`
+
+Upstream status: `Tracks origin/main; no ahead/behind marker reported by git status -sb`
+
+Final build date: `2026-05-01 18:06:58 +08:00`
+
+Release artifact / zip name: `N/A — static build output in apps/web/dist`
 
 Deployed URL: `________________`
 
 Tester: `________________`
 
+## Round 8 Submission Lock Record
+
+Use only these status values: `Not tested`, `Passed`, `Failed`, `N/A`.
+
+| Item | Status | Evidence / notes |
+|---|---|---|
+| GitHub repo URL recorded | Passed | `https://github.com/StarryDeserts/MarginGuard`. |
+| Final commit hash recorded | Passed | `906842a`. |
+| Branch recorded | Passed | `main`. |
+| Working tree clean or intentionally accepted | Failed | Dirty after Round 8 docs/evidence changes. Commit or explicitly accept dirty state before final submission label can be upgraded. |
+| Public build live flag state | Passed | Builds ran with `VITE_ENABLE_LIVE_ADD_COLLATERAL=false` set in the same PowerShell environment. |
+| App-level safe build completed | Passed | `pnpm -C apps/web build` exited 0 with live flag forced to false. |
+| Root safe build completed | Passed | `pnpm build` exited 0 with live flag forced to false. |
+| Safety scan completed | Passed | `pnpm verify:submission-safety` passed and scanned 184 text files. |
+| Static preview route smoke | Passed | Static preview returned HTTP 200 for `/`, `/dashboard`, `/rescue`, `/demo`, `/settings`. |
+| Deployment URL recorded | Not tested | Fill only after public static deployment exists. |
+| Screenshot evidence captured | Not tested | Full manager IDs must be redacted. |
+| Demo video captured | Not tested | No live success claim without digest. |
+| Live Add Collateral transaction submitted | N/A | N/A — no live Add Collateral transaction submitted. |
+| Real transaction digest | N/A | N/A — no live Add Collateral transaction submitted. |
+| Final go/no-go label | Passed | `Ready after manual QA / version lock`. |
+
 ## Command Checklist
+
+- [ ] Safe build environment confirmed:
+
+  ```powershell
+  Remove-Item Env:VITE_ENABLE_LIVE_ADD_COLLATERAL -ErrorAction SilentlyContinue
+  $env:VITE_ENABLE_LIVE_ADD_COLLATERAL="false"
+  ```
 
 - [ ] `pnpm install` completed if dependencies changed.
 - [ ] `pnpm verify:submission-safety`.
@@ -40,6 +79,14 @@ Tester: `________________`
 - [ ] `/rescue` loads rescue simulator.
 - [ ] `/demo` loads Demo Mode without manager or wallet.
 - [ ] `/settings` loads manager settings.
+
+Static preview command:
+
+```powershell
+pnpm -C apps/web preview --host 127.0.0.1
+```
+
+If Codex cannot observe routes in a browser/static preview session, leave route status as `Not tested — user manual`. Do not mark route smoke as passed from build success alone.
 
 ## Live Flag Off Checklist
 
@@ -79,6 +126,7 @@ Do not alter risk ratio, target ratio, actionability, or mock state to force thi
 - [ ] Source label shows DeepBook state when read succeeds.
 - [ ] Partial/read-error/unavailable states are honest if read is incomplete.
 - [ ] localStorage is not presented as chain truth.
+- [ ] If the real manager has explicit zero debt, Dashboard shows `No debt` / `No active liquidation risk` instead of `1000.00` or `Infinity`.
 
 ## Demo Mode Simulated Action-Needed Checklist
 
@@ -86,6 +134,8 @@ Do not alter risk ratio, target ratio, actionability, or mock state to force thi
 - [ ] Simulated labels are visible.
 - [ ] If a real Mainnet SUI/USDC manager is loaded, Demo Mode can switch to `Real Manager Baseline + Simulated Shock`.
 - [ ] Real baseline fields are labeled `Real DeepBook`; shocked price and stressed RR are labeled simulated/estimate.
+- [ ] If the real baseline has no debt, Demo Mode shows `No debt`, `N/A`, and `No active liquidation risk`, with no `0.00 USDC` Add Collateral recommendation.
+- [ ] Simulated Demo Mode still shows the action-needed `1.17 -> 1.30` story when needed for video.
 - [ ] Price shock moves risk toward Warning/action-needed.
 - [ ] Add Collateral is the P0 recommended path.
 - [ ] Reduce-only and Smart TPSL are P1/demo-only or SDK-required.
@@ -95,6 +145,7 @@ Do not alter risk ratio, target ratio, actionability, or mock state to force thi
 
 - [ ] With a full DeepBook baseline, Rescue Simulator shows `Real DeepBook baseline`.
 - [ ] With partial DeepBook data, Rescue Simulator shows display-only partial data and does not enable live submit.
+- [ ] With real no-debt data, Rescue Simulator says no real rescue is needed and labels any action-needed story as simulated what-if.
 - [ ] With the current healthy manager, Rescue Simulator says healthy/no-rescue-needed and does not show an urgent Add Collateral signing CTA.
 - [ ] Without a readable manager, Rescue Simulator falls back to simulated plans.
 
@@ -139,9 +190,14 @@ Do not force live execution if no safe action-needed manager exists. Use Demo Mo
 - [ ] Manager import/settings with full IDs redacted.
 - [ ] Real DeepBook read or honest unavailable/read-error state.
 - [ ] No-rescue-needed block for current healthy manager if used.
+- [ ] Rescue Simulator shows `Real DeepBook baseline`, `Partial DeepBook baseline`, or clearly simulated fallback.
+- [ ] No-debt screenshots show `No debt`, `N/A`, or `No active liquidation risk`, not `1000.00` or `Infinity`.
 - [ ] Demo Mode Warning/action-needed state.
+- [ ] Demo Mode labels `Real DeepBook baseline`, `Simulated shock`, `Estimate`, `App target`, and `Demo fallback` where applicable.
+- [ ] Public/default build shows live signing disabled or equivalent safe copy.
 - [ ] Transaction Review warnings.
 - [ ] Simulated Result modal.
+- [ ] No fake Explorer link and no digest unless a real digest exists.
 
 ## Video Recording Checklist
 
@@ -150,6 +206,10 @@ Do not force live execution if no safe action-needed manager exists. Use Demo Mo
 - [ ] Explain manual manager import.
 - [ ] Explain real vs simulated vs gated-live behavior.
 - [ ] Explain real baseline vs simulated shock if Demo Mode uses an imported manager.
+- [ ] Explain that starting RR, asset value, and debt value may come from real baseline, while shocked price, stressed RR, expected after RR, and interest drift are simulated or estimated.
+- [ ] Do not call Demo Mode fully live.
+- [ ] If Rescue Simulator uses a healthy real manager, explain healthy baseline / what-if only and no urgent live signing CTA.
+- [ ] If the real manager has no active debt, explain that the real baseline proves read/safety blocking and use Simulated Demo Mode for the Warning/Add Collateral story.
 - [ ] Do not show full manager IDs.
 - [ ] Do not claim live Add Collateral success without real digest.
 - [ ] Use Demo Mode fallback if no safe action-needed manager exists.
@@ -164,4 +224,4 @@ Go only if:
 - [ ] Docs match the actual app.
 - [ ] No public material overclaims live execution, automatic protection, or background monitoring.
 
-Decision: `GO / NO-GO`
+Decision: `Ready for demo submission / Ready after manual QA / version lock / Not ready due to blocker`

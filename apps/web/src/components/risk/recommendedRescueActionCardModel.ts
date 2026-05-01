@@ -3,6 +3,7 @@ import { ADD_COLLATERAL_WRITE_CAPABILITY_MATRIX } from '../../lib/deepbook/addCo
 import { getAddCollateralRecommendation } from '../../lib/risk/rescuePlans'
 import { getAddCollateralPreviewGate } from '../../lib/tx/addCollateralPreview'
 import { classifyRisk, riskLabels } from '../../lib/risk/thresholds'
+import { getDebtDataStatus, getRiskRatioDisplay } from '../../lib/risk/riskRatio'
 import { formatPct, formatRatio, formatUsdc } from '../../lib/utils/format'
 import type { NormalizedMarginState } from '../../types/margin'
 import type { RescueActionability } from '../../types/rescue'
@@ -46,6 +47,7 @@ export function getRecommendedRescueActionCardModel(input: {
   const sourceLabel = input.sourceLabel ?? 'Unavailable'
   const recommendation = getAddCollateralRecommendation(input.state, input.sourceState)
   const availability = getRecommendedActionAvailability(input.state, input.sourceState)
+  const debtDataStatus = getDebtDataStatus(input.state)
 
   if (availability.actionability === 'action-needed' && recommendation) {
     const previewGate = getAddCollateralPreviewGate({
@@ -130,7 +132,7 @@ export function getRecommendedRescueActionCardModel(input: {
       badges: [{ label: 'No debt', variant: 'info' }],
       bodyLines: ['This manager has no borrowed debt, so no pre-liquidation rescue action is required.'],
       metricItems: [
-        { label: 'Current RR', value: 'No debt', tone: 'safe' },
+        { label: 'Current RR', value: getRiskRatioDisplay({ riskRatio: input.state?.riskRatio, debtStatus: debtDataStatus }).display, tone: 'safe' },
         { label: 'Target RR', value: formatOptionalRatio(input.state?.targetRiskRatio), tone: 'primary' },
         { label: 'Liquidation RR', value: formatOptionalRatio(input.state?.liquidationRiskRatio), tone: 'warning' },
       ],
@@ -143,13 +145,18 @@ export function getRecommendedRescueActionCardModel(input: {
     }
   }
 
+  const insufficientDebtCopy =
+    input.sourceState === 'partial-deepbook' && debtDataStatus === 'insufficient-debt-data'
+      ? 'Debt fields are unavailable, so MarginGuard cannot prove this is a no-debt manager.'
+      : 'Read manager state before computing a rescue action.'
+
   return {
     actionability: availability.actionability,
     canRecommend: false,
     cardTone: 'neutral',
     title: 'Recommendation unavailable',
     badges: [{ label: 'Unavailable', variant: 'info' }],
-    bodyLines: ['Read manager state before computing a rescue action.'],
+    bodyLines: [insufficientDebtCopy],
     metricItems: [],
     primaryActionLabel: 'Open Rescue Simulator Preview',
     primaryActionVariant: 'secondary',

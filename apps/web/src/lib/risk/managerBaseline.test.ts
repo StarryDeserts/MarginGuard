@@ -50,6 +50,59 @@ describe('manager baseline eligibility', () => {
     expect(baseline.reason).toContain('display-only')
   })
 
+  it('marks partial DeepBook explicit zero-debt baseline as no-debt display-only', () => {
+    const baseline = createManagerBaseline({
+      state: {
+        ...mockMarginState,
+        source: 'deepbook',
+        isPartial: true,
+        riskRatio: 1000,
+        debtValueUsd: 0,
+        baseDebt: 0,
+        quoteDebt: 0,
+        manager: {
+          ...mockMarginState.manager,
+          objectId: '0x' + '5'.repeat(64),
+        },
+      },
+      sourceState: 'partial-deepbook',
+      selectedNetwork: 'mainnet',
+    })
+
+    expect(baseline.sourceLevel).toBe('partial-deepbook-baseline')
+    expect(baseline.debtDataStatus).toBe('zero-debt')
+    expect(baseline.actionability).toBe('zero-debt')
+    expect(baseline.canOpenRealAddCollateralReview).toBe(false)
+    expect(baseline.fields.currentRiskRatio.display).toBe('No debt')
+    expect(baseline.reason).toContain('No active borrowed debt')
+  })
+
+  it('does not infer no-debt from partial DeepBook state with missing raw debt fields', () => {
+    const baseline = createManagerBaseline({
+      state: {
+        ...mockMarginState,
+        source: 'deepbook',
+        isPartial: true,
+        riskRatio: 1000,
+        debtValueUsd: 0,
+        baseDebt: undefined,
+        quoteDebt: undefined,
+        manager: {
+          ...mockMarginState.manager,
+          objectId: '0x' + '6'.repeat(64),
+        },
+      },
+      sourceState: 'partial-deepbook',
+      selectedNetwork: 'mainnet',
+    })
+
+    expect(baseline.sourceLevel).toBe('partial-deepbook-baseline')
+    expect(baseline.debtDataStatus).toBe('insufficient-debt-data')
+    expect(baseline.actionability).toBe('unavailable')
+    expect(baseline.fields.currentRiskRatio.display).toBe('N/A')
+    expect(baseline.reason).toContain('Debt fields are unavailable')
+  })
+
   it('blocks healthy full DeepBook baseline from urgent Add Collateral review', () => {
     const baseline = createManagerBaseline({
       state: {
@@ -58,7 +111,7 @@ describe('manager baseline eligibility', () => {
         riskRatio: 1.45,
         manager: {
           ...mockMarginState.manager,
-          objectId: '0x' + '3'.repeat(64),
+          objectId: '0x' + '7'.repeat(64),
         },
       },
       sourceState: 'full-deepbook',
@@ -99,7 +152,7 @@ describe('manager baseline eligibility', () => {
       liquidationPriceUsd: undefined,
       manager: {
         ...mockMarginState.manager,
-        objectId: '0x' + '4'.repeat(64),
+        objectId: '0x' + '8'.repeat(64),
       },
     })
 

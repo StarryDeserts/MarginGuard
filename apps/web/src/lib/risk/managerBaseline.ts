@@ -4,6 +4,7 @@ import type { AddCollateralRecommendation } from './rescuePlans'
 import { calcLiquidationDistancePct } from './liquidation'
 import { getAddCollateralRecommendation, getRescueActionability } from './rescuePlans'
 import { shortAddress } from '../utils/address'
+import { getDebtDataStatus, getRiskRatioDisplay, type DebtDataStatus } from './riskRatio'
 
 export type BaselineSourceLevel =
   | 'full-deepbook-baseline'
@@ -25,6 +26,7 @@ export type ProvenancedMetric = {
   value?: number
   provenance: MetricProvenance
   label: string
+  display: string
 }
 
 export type ManagerBaselineFields = {
@@ -50,6 +52,7 @@ export type ManagerBaseline = {
   managerShort?: string
   selectedNetwork?: AppNetwork
   marketLabel: 'SUI/USDC'
+  debtDataStatus: DebtDataStatus
   actionability: ReturnType<typeof getRescueActionability>
   recommendation?: AddCollateralRecommendation
   canUseForRealRescueBaseline: boolean
@@ -66,6 +69,7 @@ export function createManagerBaseline(input: {
   const state = input.state
   const selectedNetwork = input.selectedNetwork ?? state?.manager.network
   const managerShort = state ? shortAddress(state.manager.objectId) : undefined
+  const debtDataStatus = getDebtDataStatus(state)
   const unsupportedMainnetSuiUsdc =
     state && (state.manager.network !== 'mainnet' || state.manager.poolKey !== 'SUI_USDC' || selectedNetwork !== 'mainnet')
 
@@ -76,11 +80,12 @@ export function createManagerBaseline(input: {
       reason: input.sourceState === 'read-error' ? 'Could not read manager state.' : 'No eligible Mainnet SUI/USDC manager baseline is available.',
       selectedNetwork,
       marketLabel: 'SUI/USDC',
+      debtDataStatus,
       actionability: 'unavailable',
       canUseForRealRescueBaseline: false,
       canOpenRealAddCollateralReview: false,
       canShowLiveSigningCta: false,
-      fields: createFieldProvenance(undefined, 'simulated-demo-fallback'),
+      fields: createFieldProvenance(undefined, 'simulated-demo-fallback', undefined, debtDataStatus),
     }
   }
 
@@ -93,11 +98,12 @@ export function createManagerBaseline(input: {
       managerShort,
       selectedNetwork,
       marketLabel: 'SUI/USDC',
+      debtDataStatus,
       actionability: 'unavailable',
       canUseForRealRescueBaseline: false,
       canOpenRealAddCollateralReview: false,
       canShowLiveSigningCta: false,
-      fields: createFieldProvenance(state, 'simulated-demo-fallback'),
+      fields: createFieldProvenance(state, 'simulated-demo-fallback', undefined, debtDataStatus),
     }
   }
 
@@ -110,28 +116,38 @@ export function createManagerBaseline(input: {
       managerShort,
       selectedNetwork,
       marketLabel: 'SUI/USDC',
+      debtDataStatus,
       actionability: 'unavailable',
       canUseForRealRescueBaseline: false,
       canOpenRealAddCollateralReview: false,
       canShowLiveSigningCta: false,
-      fields: createFieldProvenance(state, 'simulated-demo-fallback'),
+      fields: createFieldProvenance(state, 'simulated-demo-fallback', undefined, debtDataStatus),
     }
   }
 
   if (input.sourceState === 'partial-deepbook' || state.isPartial) {
+    const actionability = debtDataStatus === 'zero-debt' ? 'zero-debt' : 'unavailable'
+    const reason =
+      debtDataStatus === 'zero-debt'
+        ? 'No active borrowed debt. Partial DeepBook baseline is display-only and cannot drive live signing.'
+        : debtDataStatus === 'insufficient-debt-data'
+          ? 'Debt fields are unavailable in this partial DeepBook read; baseline is display-only and cannot prove no-debt actionability.'
+          : 'Partial DeepBook baseline is display-only and cannot drive live signing.'
+
     return {
       sourceLevel: 'partial-deepbook-baseline',
       sourceLabel: 'Partial DeepBook baseline',
-      reason: 'Partial DeepBook baseline is display-only and cannot drive live signing.',
+      reason,
       state,
       managerShort,
       selectedNetwork,
       marketLabel: 'SUI/USDC',
-      actionability: 'unavailable',
+      debtDataStatus,
+      actionability,
       canUseForRealRescueBaseline: false,
       canOpenRealAddCollateralReview: false,
       canShowLiveSigningCta: false,
-      fields: createFieldProvenance(state, 'partial-deepbook-baseline'),
+      fields: createFieldProvenance(state, 'partial-deepbook-baseline', undefined, debtDataStatus),
     }
   }
 
@@ -144,11 +160,12 @@ export function createManagerBaseline(input: {
       managerShort,
       selectedNetwork,
       marketLabel: 'SUI/USDC',
+      debtDataStatus,
       actionability: 'unavailable',
       canUseForRealRescueBaseline: false,
       canOpenRealAddCollateralReview: false,
       canShowLiveSigningCta: false,
-      fields: createFieldProvenance(state, 'unavailable'),
+      fields: createFieldProvenance(state, 'unavailable', undefined, debtDataStatus),
     }
   }
 
@@ -174,12 +191,13 @@ export function createManagerBaseline(input: {
     managerShort,
     selectedNetwork,
     marketLabel: 'SUI/USDC',
+    debtDataStatus,
     actionability,
     recommendation,
     canUseForRealRescueBaseline,
     canOpenRealAddCollateralReview,
     canShowLiveSigningCta: canOpenRealAddCollateralReview,
-    fields: createFieldProvenance(state, 'full-deepbook-baseline', recommendation),
+    fields: createFieldProvenance(state, 'full-deepbook-baseline', recommendation, debtDataStatus),
   }
 }
 
@@ -232,14 +250,17 @@ function createFieldProvenance(
   state: NormalizedMarginState | undefined,
   sourceLevel: BaselineSourceLevel,
   recommendation?: AddCollateralRecommendation,
+  debtDataStatus: DebtDataStatus = getDebtDataStatus(state),
 ): ManagerBaselineFields {
   const real = sourceLevel === 'full-deepbook-baseline' || sourceLevel === 'partial-deepbook-baseline'
   const realOrFallback: MetricProvenance = real ? 'real-deepbook' : sourceLevel === 'unavailable' ? 'unavailable' : 'demo-fallback'
+  const currentRiskRatio = getRiskRatioDisplay({ riskRatio: state?.riskRatio, debtStatus: debtDataStatus })
+  const currentRiskRatioValue = currentRiskRatio.kind === 'finite' ? currentRiskRatio.value : undefined
 
   return {
     startSuiPrice: metric(state?.basePriceUsd, realOrFallback),
     shockedPrice: metric(undefined, 'simulated-shock'),
-    currentRiskRatio: metric(state?.riskRatio, realOrFallback),
+    currentRiskRatio: metric(currentRiskRatioValue, realOrFallback, currentRiskRatio.display),
     stressedRiskRatio: metric(undefined, real ? 'derived-estimate' : realOrFallback),
     liquidationThreshold: metric(state?.liquidationRiskRatio, state?.liquidationRiskRatio === undefined ? 'unavailable' : 'protocol-config'),
     targetRescueRatio: metric(state?.targetRiskRatio, state?.targetRiskRatio === undefined ? 'unavailable' : 'app-setting'),
@@ -252,12 +273,24 @@ function createFieldProvenance(
   }
 }
 
-function metric(value: number | undefined, provenance: MetricProvenance): ProvenancedMetric {
+function metric(value: number | undefined, provenance: MetricProvenance, display?: string): ProvenancedMetric {
+  const resolvedProvenance =
+    value === undefined && display === undefined && provenance !== 'simulated-shock' && provenance !== 'derived-estimate'
+      ? 'unavailable'
+      : provenance
+
   return {
     value,
-    provenance: value === undefined && provenance !== 'simulated-shock' && provenance !== 'derived-estimate' ? 'unavailable' : provenance,
-    label: getMetricProvenanceLabel(value === undefined && provenance !== 'simulated-shock' && provenance !== 'derived-estimate' ? 'unavailable' : provenance),
+    provenance: resolvedProvenance,
+    label: getMetricProvenanceLabel(resolvedProvenance),
+    display: display ?? formatMetricDisplay(value),
   }
+}
+
+function formatMetricDisplay(value: number | undefined) {
+  if (value === undefined || !Number.isFinite(value)) return 'N/A'
+
+  return value.toFixed(2)
 }
 
 function hasCoreActionabilityFields(state: NormalizedMarginState) {

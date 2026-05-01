@@ -11,7 +11,7 @@ import { RiskSummaryHero } from '../components/risk/RiskSummaryHero'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
-import { isZeroDebt } from '../lib/risk/riskRatio'
+import { getDebtDataStatus, getRiskRatioDisplay } from '../lib/risk/riskRatio'
 import { formatApr, formatPct, formatUsd } from '../lib/utils/format'
 import { useActiveManagerRiskSnapshot } from '../hooks/useActiveManagerRiskSnapshot'
 import { useTransactionReview } from '../hooks/useTransactionReview'
@@ -69,13 +69,7 @@ export function Dashboard() {
       </StaggerGroup>
       <div className="mt-5 grid gap-5 xl:grid-cols-[1fr_1.08fr]">
         {state ? (
-          <RiskRatioPathChart
-            mode={sourceState === 'full-deepbook' || sourceState === 'partial-deepbook' ? 'deepbook' : 'mock'}
-            currentRiskRatio={state.riskRatio}
-            targetRiskRatio={state.targetRiskRatio}
-            liquidationRiskRatio={state.liquidationRiskRatio}
-            zeroDebt={isZeroDebt(state)}
-          />
+          <DashboardRiskRatioPath state={state} sourceState={sourceState} />
         ) : (
           <Card className="p-5">
             <h2 className="text-xl font-semibold text-text-primary">Risk Ratio Path</h2>
@@ -170,15 +164,49 @@ function ReadDiagnosticsPanel({ diagnostic }: { diagnostic: ManagerReadDiagnosti
   )
 }
 
+function DashboardRiskRatioPath({
+  state,
+  sourceState,
+}: {
+  state: NormalizedMarginState
+  sourceState: ReturnType<typeof useActiveManagerRiskSnapshot>['sourceState']
+}) {
+  const debtStatus = getDebtDataStatus(state)
+  const riskRatioDisplay = getRiskRatioDisplay({ riskRatio: state.riskRatio, debtStatus })
+  const currentRiskRatioDisplay = riskRatioDisplay.kind === 'finite' ? undefined : riskRatioDisplay.display
+
+  return (
+    <RiskRatioPathChart
+      mode={sourceState === 'full-deepbook' || sourceState === 'partial-deepbook' ? 'deepbook' : 'mock'}
+      currentRiskRatio={riskRatioDisplay.kind === 'finite' ? riskRatioDisplay.value : undefined}
+      currentRiskRatioDisplay={currentRiskRatioDisplay}
+      targetRiskRatio={state.targetRiskRatio}
+      liquidationRiskRatio={state.liquidationRiskRatio}
+      zeroDebt={debtStatus === 'zero-debt'}
+    />
+  )
+}
+
 function buildMetrics(state?: NormalizedMarginState) {
-  const zeroDebt = isZeroDebt(state)
+  const debtStatus = getDebtDataStatus(state)
+  const riskRatioDisplay = getRiskRatioDisplay({ riskRatio: state?.riskRatio, debtStatus })
+  const zeroDebt = debtStatus === 'zero-debt'
+  const riskUnavailable = riskRatioDisplay.kind === 'unavailable'
 
   return [
           {
             label: 'Risk Ratio',
-      value: zeroDebt ? undefined : state?.riskRatio,
-      valueText: zeroDebt ? 'No debt' : undefined,
-      helper: zeroDebt ? 'No borrowed debt' : state?.riskRatio === undefined ? 'Unavailable' : state.isPartial ? 'Estimated or partial' : 'DeepBook read',
+      value: riskRatioDisplay.kind === 'finite' ? riskRatioDisplay.value : undefined,
+      valueText: riskRatioDisplay.kind === 'finite' ? undefined : riskRatioDisplay.display,
+      helper: zeroDebt
+        ? 'No active borrowed debt'
+        : riskUnavailable
+          ? 'Debt fields unavailable'
+          : state?.riskRatio === undefined
+            ? 'Unavailable'
+            : state.isPartial
+              ? 'Estimated or partial'
+              : 'DeepBook read',
             icon: <TrendingUp className="h-5 w-5" />,
             tone: zeroDebt ? ('info' as const) : ('warning' as const),
           },

@@ -11,8 +11,8 @@ Goal: explain in 2-3 minutes that MarginGuard is a browser-only safety layer for
 | 0:00-0:20 | Open landing page | `/` | MarginGuard is a pre-liquidation risk console for DeepBook Margin. |
 | 0:20-0:40 | Launch app and connect wallet | `/dashboard` | Browser-only, non-custodial, user-approved writes. |
 | 0:40-1:00 | Import/open manager | Dashboard | User imports the manager manually; no indexer or scanner. |
-| 1:00-1:20 | Show real Risk Snapshot | Dashboard | If the current manager is healthy, show no-rescue-needed blocking. |
-| 1:20-1:45 | Switch to Demo Mode | `/demo` | Simulated Demo or Real DeepBook baseline + simulated SUI price shock creates an action-needed story. |
+| 1:00-1:20 | Show real Risk Snapshot | Dashboard | If the current manager is healthy or has no active debt, show no-rescue-needed blocking. |
+| 1:20-1:45 | Switch to Demo Mode | `/demo` | Use Simulated Demo Mode for the action-needed story; Real DeepBook baseline + simulated shock may show no-debt safety blocking. |
 | 1:45-2:05 | Show rescue options | Demo / Rescue | Add Collateral is P0; reduce-only and Smart TPSL are P1/demo-only. |
 | 2:05-2:30 | Open Transaction Review | Modal | Review amount, manager short ID, wallet, network, warnings, and acknowledgement. |
 | 2:30-2:45 | Show simulated result | Result | Use demo result unless a real digest exists. Do not claim live success without digest. |
@@ -25,11 +25,11 @@ Goal: explain in 2-3 minutes that MarginGuard is a browser-only safety layer for
 3. Connect Sui wallet.
 4. Import or select a SUI/USDC Margin Manager.
 5. Show current Risk Snapshot.
-6. If the current real manager is healthy, point out `No rescue needed while RR is above target.`
+6. If the current real manager is healthy or has no active borrowed debt, point out `No rescue needed` / `No active liquidation risk`.
 7. Go to `/demo`.
 8. Choose `Real Manager Baseline + Simulated Shock` if a real baseline is loaded, otherwise use `Simulated Demo Mode`.
 9. Run the simulated price shock.
-10. Show Warning/action-needed state with real, simulated, and estimate labels.
+10. If the real baseline has no debt, show that it stays `No debt` / `No active liquidation risk`; switch to `Simulated Demo Mode` to show the Warning/action-needed `1.17 -> 1.30` story.
 11. Click `Open Rescue Simulator` or review the recommendation in Demo Mode.
 12. Click `Review Add Collateral PTB Preview`.
 13. Show Transaction Review warnings and acknowledgement.
@@ -42,7 +42,7 @@ DeepBook Margin brings leverage to Sui, but leverage creates a risk-management g
 
 MarginGuard is a browser-only safety layer around DeepBook Margin. The user connects a Sui wallet, manually imports a Margin Manager, and the app reads the manager through Sui and DeepBook adapters. There is no backend, no indexer, no keeper, and no custody.
 
-On the real dashboard, the current manager can be read directly. If it is healthy, MarginGuard blocks Add Collateral signing because no rescue is needed. For the demo story, we switch to Demo Mode. If a real Mainnet SUI/USDC manager baseline is loaded, Demo Mode can seed starting RR, asset value, debt value, threshold, target ratio, and borrow APR from it. The SUI price shock and stressed RR remain simulated and labeled.
+On the real dashboard, the current manager can be read directly. If it is healthy or has no active borrowed debt, MarginGuard blocks Add Collateral signing because no rescue is needed. A no-debt manager may show `No debt`, `N/A`, and `No active liquidation risk` instead of a numeric risk-ratio sentinel. For the action-needed demo story, we switch to Simulated Demo Mode or a clearly labeled simulated what-if. If a real Mainnet SUI/USDC manager baseline is loaded, Demo Mode can seed starting RR, asset value, debt value, threshold, target ratio, and borrow APR from it. The SUI price shock and stressed RR remain simulated and labeled.
 
 MarginGuard compares three rescue paths. Add Collateral is the P0 path. Reduce-only and Smart TPSL are P1/demo-only in this submission. We choose Add Collateral and open Transaction Review before any wallet prompt. The review shows the manager short ID, connected wallet, Mainnet, SUI/USDC market, USDC amount, before and expected after risk ratios, warnings, and acknowledgement.
 
@@ -74,6 +74,10 @@ If the real manager is healthy:
 
 > This manager is healthy, so MarginGuard correctly blocks Add Collateral signing. I will use Demo Mode to show the action-needed flow without forcing a real transaction.
 
+If the real manager has no active borrowed debt:
+
+> This manager has no active borrowed debt, so MarginGuard shows no active liquidation risk and blocks real Add Collateral review. I will switch to Simulated Demo Mode for the Warning/Add Collateral story.
+
 If wallet execution is unavailable:
 
 > The live Add Collateral path is safety-gated and disabled by default. Since no safe action-needed manager is available, this result is simulated and no transaction was submitted.
@@ -102,6 +106,7 @@ If a wallet transaction fails or is rejected during controlled manual QA:
 - [ ] Wallet connection UI is visible.
 - [ ] Manager import is manual.
 - [ ] Current healthy manager remains no-rescue-needed and signing blocked.
+- [ ] Current no-debt manager shows no active liquidation risk and signing blocked.
 - [ ] Demo Mode works without manager or wallet.
 - [ ] Demo values are labeled simulated.
 - [ ] Add Collateral review opens.

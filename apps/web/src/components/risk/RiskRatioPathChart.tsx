@@ -13,6 +13,7 @@ type RiskRatioPathChartProps = {
   afterValue?: number
   mode?: RiskRatioPathChartMode
   currentRiskRatio?: number
+  currentRiskRatioDisplay?: string
   targetRiskRatio?: number
   liquidationRiskRatio?: number
   zeroDebt?: boolean
@@ -34,6 +35,7 @@ export function RiskRatioPathChart({
   afterValue,
   mode = 'mock',
   currentRiskRatio,
+  currentRiskRatioDisplay,
   targetRiskRatio,
   liquidationRiskRatio,
   zeroDebt,
@@ -43,6 +45,7 @@ export function RiskRatioPathChart({
     points,
     afterValue,
     currentRiskRatio,
+    currentRiskRatioDisplay,
     targetRiskRatio,
     liquidationRiskRatio,
     zeroDebt,
@@ -58,7 +61,7 @@ export function RiskRatioPathChart({
         <div className="rounded-lg border border-guard-border bg-guard-bg-soft p-5">
           <p className="text-sm text-text-secondary">{viewModel.message}</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <ReferenceMetric label="Current RR" value={viewModel.currentRiskRatio} />
+            <ReferenceMetric label="Current RR" value={viewModel.currentRiskRatio} valueText={viewModel.currentRiskRatioDisplay} />
             <ReferenceMetric label="Target" value={viewModel.targetRiskRatio} />
             <ReferenceMetric label="Liquidation" value={viewModel.liquidationRiskRatio} />
           </div>
@@ -83,7 +86,7 @@ export function RiskRatioPathChart({
           </div>
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
             {viewModel.metrics.map((metric) => (
-              <ReferenceMetric key={metric.label} label={metric.label} value={metric.value} />
+              <ReferenceMetric key={metric.label} label={metric.label} value={metric.value} valueText={metric.valueText} />
             ))}
           </div>
           {viewModel.safetyScale ? <SnapshotSafetyScale scale={viewModel.safetyScale} /> : null}
@@ -148,11 +151,11 @@ export function RiskRatioPathChart({
   )
 }
 
-function ReferenceMetric({ label, value }: { label: string; value?: number }) {
+function ReferenceMetric({ label, value, valueText }: { label: string; value?: number; valueText?: string }) {
   return (
     <div className="rounded-lg border border-guard-border bg-guard-surface/70 p-3">
       <p className="text-xs uppercase tracking-[0.2em] text-text-muted">{label}</p>
-      <p className="mt-1 text-lg font-semibold text-text-primary">{value === undefined ? 'N/A' : formatRatio(value)}</p>
+      <p className="mt-1 text-lg font-semibold text-text-primary">{valueText ?? (value === undefined ? 'N/A' : formatRatio(value))}</p>
     </div>
   )
 }

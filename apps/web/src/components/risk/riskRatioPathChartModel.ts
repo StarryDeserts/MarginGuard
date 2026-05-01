@@ -6,6 +6,7 @@ export type RiskRatioPathChartMode = 'mock' | 'deepbook'
 export type RiskRatioSnapshotMetric = {
   label: 'Current RR' | 'Target RR' | 'Liquidation RR'
   value?: number
+  valueText?: string
 }
 
 export type RiskRatioSnapshotScale = {
@@ -29,6 +30,7 @@ export type RiskRatioPathChartViewModel =
       kind: 'empty'
       message: string
       currentRiskRatio?: number
+      currentRiskRatioDisplay?: string
       targetRiskRatio?: number
       liquidationRiskRatio?: number
     }
@@ -53,6 +55,7 @@ export function getRiskRatioPathChartViewModel(input: {
   targetRiskRatio?: number
   liquidationRiskRatio?: number
   zeroDebt?: boolean
+  currentRiskRatioDisplay?: string
 }): RiskRatioPathChartViewModel {
   const targetRiskRatio = input.targetRiskRatio ?? input.afterValue
 
@@ -61,7 +64,8 @@ export function getRiskRatioPathChartViewModel(input: {
       return {
         kind: 'empty',
         message: 'Risk path is unavailable because this manager has no borrowed debt.',
-        currentRiskRatio: input.currentRiskRatio,
+        currentRiskRatio: undefined,
+        currentRiskRatioDisplay: input.currentRiskRatioDisplay ?? 'No debt',
         targetRiskRatio,
         liquidationRiskRatio: input.liquidationRiskRatio,
       }
@@ -78,6 +82,7 @@ export function getRiskRatioPathChartViewModel(input: {
       liquidationRiskRatio: input.liquidationRiskRatio,
       metrics: buildSnapshotMetrics({
         currentRiskRatio: input.currentRiskRatio,
+        currentRiskRatioDisplay: input.currentRiskRatioDisplay,
         targetRiskRatio,
         liquidationRiskRatio: input.liquidationRiskRatio,
       }),
@@ -110,11 +115,12 @@ function isFiniteNumber(value: number | undefined): value is number {
 
 function buildSnapshotMetrics(input: {
   currentRiskRatio?: number
+  currentRiskRatioDisplay?: string
   targetRiskRatio?: number
   liquidationRiskRatio?: number
 }): RiskRatioSnapshotMetric[] {
   return [
-    { label: 'Current RR', value: input.currentRiskRatio },
+    { label: 'Current RR', value: input.currentRiskRatioDisplay ? undefined : input.currentRiskRatio, valueText: input.currentRiskRatioDisplay },
     { label: 'Target RR', value: input.targetRiskRatio },
     { label: 'Liquidation RR', value: input.liquidationRiskRatio },
   ]

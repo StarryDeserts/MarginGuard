@@ -9,6 +9,7 @@ import { RescueResultModal } from '../components/rescue/RescueResultModal'
 import { TransactionReviewModal } from '../components/rescue/TransactionReviewModal'
 import { RiskRatioPathChart } from '../components/risk/RiskRatioPathChart'
 import { Badge } from '../components/ui/Badge'
+import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { useActiveManagerRiskSnapshot } from '../hooks/useActiveManagerRiskSnapshot'
 import { useDemoScenario } from '../hooks/useDemoScenario'
@@ -25,16 +26,17 @@ export function Demo() {
   const projection = demo.projection
   const realBaselineAvailable =
     snapshot.baseline.sourceLevel === 'full-deepbook-baseline' || snapshot.baseline.sourceLevel === 'partial-deepbook-baseline'
+  const canRecommendDemoAddCollateral = projection.canRecommendAddCollateral
   const demoReviewPlan: RescuePlan = {
     ...recommendedRescuePlan,
-    beforeRiskRatio: demo.derived.simulatedRiskRatio,
-    expectedAfterRiskRatio: demo.derived.afterRiskRatio,
-    liquidationDistanceBeforePct: demo.derived.liquidationDistancePct,
-    liquidationDistanceAfterPct: demo.derived.afterLiquidationDistancePct,
-    estimatedCostUsd: demo.derived.recommendedAddCollateralUsd,
+    beforeRiskRatio: canRecommendDemoAddCollateral ? demo.derived.simulatedRiskRatio : recommendedRescuePlan.beforeRiskRatio,
+    expectedAfterRiskRatio: canRecommendDemoAddCollateral ? demo.derived.afterRiskRatio : recommendedRescuePlan.expectedAfterRiskRatio,
+    liquidationDistanceBeforePct: canRecommendDemoAddCollateral ? demo.derived.liquidationDistancePct : recommendedRescuePlan.liquidationDistanceBeforePct,
+    liquidationDistanceAfterPct: canRecommendDemoAddCollateral ? demo.derived.afterLiquidationDistancePct : recommendedRescuePlan.liquidationDistanceAfterPct,
+    estimatedCostUsd: canRecommendDemoAddCollateral ? demo.derived.recommendedAddCollateralUsd : recommendedRescuePlan.estimatedCostUsd,
     params: {
       ...recommendedRescuePlan.params,
-      addAmountUsdc: demo.derived.recommendedAddCollateralUsd,
+      addAmountUsdc: canRecommendDemoAddCollateral ? demo.derived.recommendedAddCollateralUsd : recommendedRescuePlan.params.addAmountUsdc,
     },
   }
 
@@ -54,7 +56,11 @@ export function Demo() {
             startPrice={projection.startPrice.value}
             shockedPrice={demo.derived.shockedPrice}
             startingRiskRatio={projection.startingRiskRatio.value}
+            startingRiskRatioDisplay={projection.startingRiskRatio.display}
+            startingRiskStateLabel={projection.startingRiskStateLabel}
             simulatedRiskRatio={demo.derived.simulatedRiskRatio}
+            simulatedRiskRatioDisplay={projection.stressedRiskRatio.display}
+            simulatedRiskStateLabel={projection.stressedRiskStateLabel}
             liquidationThreshold={projection.liquidationThreshold.value}
             targetRiskRatio={projection.targetRescueRatio.value}
             provenanceLabels={{
@@ -89,12 +95,15 @@ export function Demo() {
               borrowAprLabel={projection.borrowApr.label}
               interestDriftLabel={projection.interestDrift.label}
               simulatedRiskRatio={demo.derived.simulatedRiskRatio}
+              simulatedRiskRatioDisplay={projection.stressedRiskRatio.display}
+              simulatedRiskStateLabel={projection.stressedRiskStateLabel}
               simulatedRiskRatioLabel={projection.stressedRiskRatio.label}
               assetValueUsd={projection.assetValue.value}
               assetValueLabel={projection.assetValue.label}
               debtValueUsd={projection.debtValue.value}
               debtValueLabel={projection.debtValue.label}
               liquidationDistancePct={demo.derived.liquidationDistancePct}
+              liquidationDistanceDisplay={projection.liquidationDistancePct.display}
               liquidationDistanceLabel={projection.liquidationDistancePct.label}
             />
           </div>
@@ -104,17 +113,48 @@ export function Demo() {
           </div>
         </div>
         <div className="space-y-5">
-          <DemoRescueRecommendation
-            beforeRiskRatio={demo.derived.simulatedRiskRatio}
-            afterRiskRatio={demo.derived.afterRiskRatio}
-            addCollateralUsd={demo.derived.recommendedAddCollateralUsd}
-            addCollateralLabel={projection.addCollateralRecommendation.label}
-            afterRiskRatioLabel={projection.expectedAfterRiskRatio.label}
-            liquidationDistanceBeforePct={demo.derived.liquidationDistancePct}
-            liquidationDistanceAfterPct={demo.derived.afterLiquidationDistancePct}
-            onReview={review.openReview}
-            onSimulatedResult={review.submitMock}
-          />
+          {canRecommendDemoAddCollateral ? (
+            <DemoRescueRecommendation
+              beforeRiskRatio={demo.derived.simulatedRiskRatio}
+              afterRiskRatio={demo.derived.afterRiskRatio}
+              addCollateralUsd={demo.derived.recommendedAddCollateralUsd}
+              addCollateralLabel={projection.addCollateralRecommendation.label}
+              afterRiskRatioLabel={projection.expectedAfterRiskRatio.label}
+              liquidationDistanceBeforePct={demo.derived.liquidationDistancePct}
+              liquidationDistanceAfterPct={demo.derived.afterLiquidationDistancePct}
+              onReview={review.openReview}
+              onSimulatedResult={review.submitMock}
+            />
+          ) : (
+            <Card className="border-sui-cyan/50 bg-sui-cyan/10 p-5">
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <h2 className="text-xl font-semibold text-text-primary">No Active Liquidation Risk</h2>
+                <Badge variant="info">No debt</Badge>
+              </div>
+              <p className="text-sm leading-6 text-text-secondary">
+                {projection.noDebtCopy ??
+                  'This baseline does not have an action-needed Add Collateral recommendation. Use Simulated Demo Mode for the rescue story.'}
+              </p>
+              <div className="mt-5 rounded-lg border border-guard-border bg-guard-bg-soft p-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <p className="text-sm text-text-secondary">Real baseline RR</p>
+                    <p className="text-2xl font-semibold text-sui-cyan">{projection.startingRiskRatio.display}</p>
+                    <p className="text-xs text-text-muted">{projection.startingRiskRatio.label}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-text-secondary">Add Collateral</p>
+                    <p className="text-2xl font-semibold text-text-primary">{projection.addCollateralRecommendation.display}</p>
+                    <p className="text-xs text-text-muted">Review disabled for current real baseline</p>
+                  </div>
+                </div>
+              </div>
+              <Button className="mt-5 w-full" variant="secondary" onClick={() => demo.setBaselineMode('simulated-demo')}>
+                Switch to Simulated Demo Mode
+              </Button>
+              <p className="mt-4 text-sm text-text-muted">Demo Mode never opens a live wallet prompt or shows a fake explorer link.</p>
+            </Card>
+          )}
           <Card className="p-5">
             <div className="mb-4 flex items-center gap-2">
               <h2 className="text-xl font-semibold text-text-primary">Rescue Comparison</h2>

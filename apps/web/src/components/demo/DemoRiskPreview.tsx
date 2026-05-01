@@ -10,12 +10,15 @@ type DemoRiskPreviewProps = {
   borrowAprLabel: string
   interestDriftLabel: string
   simulatedRiskRatio: number
+  simulatedRiskRatioDisplay: string
+  simulatedRiskStateLabel: string
   simulatedRiskRatioLabel: string
   assetValueUsd: number
   assetValueLabel: string
   debtValueUsd: number
   debtValueLabel: string
   liquidationDistancePct: number
+  liquidationDistanceDisplay: string
   liquidationDistanceLabel: string
 }
 
@@ -25,14 +28,19 @@ export function DemoRiskPreview({
   borrowAprLabel,
   interestDriftLabel,
   simulatedRiskRatio,
+  simulatedRiskRatioDisplay,
+  simulatedRiskStateLabel,
   simulatedRiskRatioLabel,
   assetValueUsd,
   assetValueLabel,
   debtValueUsd,
   debtValueLabel,
   liquidationDistancePct,
+  liquidationDistanceDisplay,
   liquidationDistanceLabel,
 }: DemoRiskPreviewProps) {
+  const noActiveLiquidationRisk = simulatedRiskStateLabel === 'No active liquidation risk'
+
   return (
     <Card className="p-5">
       <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -42,10 +50,18 @@ export function DemoRiskPreview({
         </Badge>
       </div>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <MetricCard label="Stressed RR" value={simulatedRiskRatio} helper={simulatedRiskRatioLabel} icon={<ShieldAlert className="h-5 w-5" />} tone="warning" />
+        <MetricCard
+          label="Stressed RR"
+          value={simulatedRiskRatio}
+          valueText={noActiveLiquidationRisk ? simulatedRiskRatioDisplay : undefined}
+          helper={noActiveLiquidationRisk ? simulatedRiskStateLabel : simulatedRiskRatioLabel}
+          icon={<ShieldAlert className="h-5 w-5" />}
+          tone={noActiveLiquidationRisk ? 'healthy' : 'warning'}
+        />
         <MetricCard
           label="Liquidation Distance"
           value={liquidationDistancePct}
+          valueText={noActiveLiquidationRisk ? liquidationDistanceDisplay : undefined}
           helper={liquidationDistanceLabel}
           icon={<Percent className="h-5 w-5" />}
           format={formatPct}

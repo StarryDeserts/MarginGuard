@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { calcRiskRatio, isZeroDebt } from './riskRatio'
+import { calcRiskRatio, getDebtDataStatus, isZeroDebt } from './riskRatio'
 
 describe('calcRiskRatio', () => {
   it('calculates asset / debt', () => {
@@ -10,9 +10,17 @@ describe('calcRiskRatio', () => {
     expect(calcRiskRatio(540, 0)).toBe(Number.POSITIVE_INFINITY)
   })
 
-  it('detects zero debt from raw debt values before display formatting', () => {
+  it('detects zero debt from explicit raw debt values before display formatting', () => {
     expect(isZeroDebt({ baseDebt: 0, quoteDebt: 0, debtValueUsd: 100 })).toBe(true)
-    expect(isZeroDebt({ debtValueUsd: 0 })).toBe(true)
+    expect(isZeroDebt({ debtValueUsd: 0 })).toBe(false)
     expect(isZeroDebt({ baseDebt: 0, quoteDebt: 1, debtValueUsd: 0 })).toBe(false)
+  })
+
+  it('classifies missing debt fields as insufficient instead of zero debt', () => {
+    expect(getDebtDataStatus({ baseDebt: 0, quoteDebt: 0, debtValueUsd: 0 })).toBe('zero-debt')
+    expect(getDebtDataStatus({ baseDebt: 0, quoteDebt: 0.01, debtValueUsd: 0 })).toBe('active-debt')
+    expect(getDebtDataStatus({ debtValueUsd: 0 })).toBe('insufficient-debt-data')
+    expect(getDebtDataStatus({ debtValueUsd: 12 })).toBe('active-debt')
+    expect(getDebtDataStatus(undefined)).toBe('insufficient-debt-data')
   })
 })

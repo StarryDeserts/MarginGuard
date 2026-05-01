@@ -1,7 +1,7 @@
 import type { CompleteNormalizedMarginState, NormalizedMarginState } from '../../types/margin'
 import type { RescueActionability, RescuePlan } from '../../types/rescue'
 import { calcLiquidationDistancePct } from './liquidation'
-import { calcRiskRatio, DEBT_EPSILON_USD, isZeroDebt } from './riskRatio'
+import { calcRiskRatio, DEBT_EPSILON_USD, getDebtDataStatus } from './riskRatio'
 import { requiredAddCollateralValueUsd } from './value'
 
 export type RescuePlanInputs = {
@@ -23,9 +23,9 @@ export type AddCollateralRecommendation = {
 
 export function getRescueActionability(state?: NormalizedMarginState, sourceState?: string): RescueActionability {
   if (sourceState === 'read-error') return 'read-error'
-  if (sourceState === 'partial-deepbook') return 'unavailable'
   if (!state) return 'unavailable'
-  if (isZeroDebt(state)) return 'zero-debt'
+  if (getDebtDataStatus(state) === 'zero-debt') return 'zero-debt'
+  if (sourceState === 'partial-deepbook') return 'unavailable'
   if (state.riskRatio === undefined || state.targetRiskRatio === undefined) return 'unavailable'
   if (state.assetValueUsd === undefined || state.debtValueUsd === undefined || state.liquidationRiskRatio === undefined) {
     return 'unavailable'

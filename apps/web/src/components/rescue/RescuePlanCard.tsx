@@ -37,6 +37,7 @@ export function RescuePlanCard({
 }: RescuePlanCardProps) {
   const Icon = iconMap[plan.type]
   const isP0 = plan.priority === 'P0'
+  const reviewButtonLabel = plan.type === 'ADD_COLLATERAL' ? plan.ctaLabel : 'Not wired'
 
   return (
     <Card
@@ -165,7 +166,7 @@ export function RescuePlanCard({
           }}
           icon={<ArrowRight className="h-4 w-4" />}
         >
-          {isP0 ? plan.ctaLabel : 'Not wired'}
+          {isP0 ? plan.ctaLabel : reviewButtonLabel}
         </Button>
       </div>
     </Card>

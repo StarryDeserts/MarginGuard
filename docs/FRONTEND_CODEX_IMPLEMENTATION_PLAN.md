@@ -838,12 +838,12 @@ hooks/useTransactionReview.ts
 | Section         | Required content                                             |
 | --------------- | ------------------------------------------------------------ |
 | Header          | Review Rescue Transaction                                    |
-| Action Summary  | Add Collateral, Wallet-signed PTB, SUI/USDC, DeepBook Margin, Manager |
+| Action Summary  | Add Collateral, gated PTB path, SUI/USDC, DeepBook Margin, Manager |
 | Impact Preview  | Before RR 1.17 → After RR 1.30                               |
 | Details         | Amount 45 USDC, gas, wallet, network                         |
 | Warnings        | stale price, insufficient balance, SDK call failure, rejected transaction |
 | Acknowledgement | “I understand this is an estimate until confirmed onchain.”  |
-| Footer          | Cancel, Sign Rescue PTB, Back to Simulator                   |
+| Footer          | Cancel, Sign and Submit with Wallet only when live gates pass, Back to Simulator |
 
 ### Required states
 
@@ -897,11 +897,11 @@ components/rescue/TransactionProgress.tsx
 ### Required content
 
 ```txt
-Rescue PTB Submitted
+Mock Rescue Result or Submitted with digest
 Action: Add Collateral
 Amount: 45 USDC
 Transaction Digest: 9kX2...F4a9
-Execution Mode: Wallet-signed PTB
+Execution Mode: Gated Add Collateral PTB
 Before RR: 1.17 Warning
 Expected After RR: 1.30 Healthy
 Liquidation Distance: 6.4% -> 17.6%

@@ -44,14 +44,14 @@ export function RescueSimulator() {
   const selectedPlan = plans.find((plan) => plan.id === selectedPlanId) ?? plans[0]
   const smartTpslPlan = plans.find((plan) => plan.type === 'SMART_TPSL')
   const liquidationPriceUsdc = Number(smartTpslPlan?.params.liquidationPriceUsdc ?? mockMarginState.liquidationPriceUsd)
-  const currentRiskRatio = simulatorModel.baseline.fields.currentRiskRatio.value ?? mockMarginState.riskRatio
+  const currentRiskRatioDisplay = simulatorModel.currentRiskRatioDisplay
   const liquidationThreshold = simulatorModel.baseline.fields.liquidationThreshold.value ?? mockMarginState.liquidationRiskRatio
   const targetRiskRatio = simulatorModel.baseline.fields.targetRescueRatio.value ?? mockMarginState.targetRiskRatio
   const sourceNotice =
-    simulatorModel.baseline.sourceLevel === 'full-deepbook-baseline'
+    simulatorModel.sourceMode === 'real-full'
       ? simulatorModel.statusCopy
-      : simulatorModel.baseline.sourceLevel === 'partial-deepbook-baseline'
-        ? 'Partial DeepBook manager data is display-only; rescue plans stay conservative estimates.'
+      : simulatorModel.sourceMode === 'real-partial'
+        ? simulatorModel.statusCopy
         : 'Simulated fallback - Rescue Simulator can run without a manager and never opens a wallet prompt from simulated state.'
 
   const inputErrors = {
@@ -76,15 +76,27 @@ export function RescueSimulator() {
           <Badge variant={simulatorModel.baseline.sourceLevel === 'full-deepbook-baseline' ? 'recommended' : simulatorModel.baseline.sourceLevel === 'partial-deepbook-baseline' ? 'warning' : 'info'}>
             {simulatorModel.sourceBadge}
           </Badge>
-          <Badge variant="neutral">{simulatorModel.planSourceLabel === 'Real DeepBook baseline' ? 'Estimated projections' : 'Simulated plans'}</Badge>
+          <Badge variant="neutral">{simulatorModel.planSourceLabel === 'Real DeepBook baseline' ? 'Estimated projections' : simulatorModel.planSourceLabel}</Badge>
           <span className="text-sm text-text-secondary">{sourceNotice}</span>
         </div>
         <div className="grid gap-5 xl:grid-cols-[1fr_1fr_1fr_1.2fr] xl:items-center">
           <div>
             <p className="text-sm text-text-secondary">Current RR</p>
             <div className="mt-2 flex items-center gap-4">
-              <span className="text-6xl font-semibold text-warning-orange">{formatRatio(currentRiskRatio)}</span>
-              <Badge variant={simulatorModel.baseline.actionability === 'no-rescue-needed' ? 'healthy' : 'warning'}>
+              <span
+                className={`text-6xl font-semibold ${
+                  simulatorModel.currentRiskRatioKind === 'finite' ? 'text-warning-orange' : 'text-sui-cyan'
+                }`}
+              >
+                {currentRiskRatioDisplay}
+              </span>
+              <Badge
+                variant={
+                  simulatorModel.baseline.actionability === 'no-rescue-needed' || simulatorModel.baseline.actionability === 'zero-debt'
+                    ? 'healthy'
+                    : 'warning'
+                }
+              >
                 {simulatorModel.statusTitle}
               </Badge>
             </div>
@@ -136,8 +148,10 @@ export function RescueSimulator() {
             reviewDisabledReason={
               simulatorModel.baseline.actionability === 'no-rescue-needed'
                 ? 'No rescue needed'
+                : simulatorModel.baseline.actionability === 'zero-debt'
+                  ? 'Review disabled for current real baseline'
                 : simulatorModel.baseline.sourceLevel === 'partial-deepbook-baseline'
-                  ? 'Partial data: review disabled'
+                  ? 'Review disabled for current real baseline'
                   : 'Preview unavailable'
             }
             onReview={openAddCollateralReview}

@@ -97,4 +97,45 @@ describe('RecommendedRescueActionCard view model', () => {
     expect(JSON.stringify(viewModel)).not.toContain('Infinity')
     expect(JSON.stringify(viewModel)).not.toContain('1000.00')
   })
+
+  it('shows partial explicit zero debt as no active debt without review eligibility', () => {
+    const viewModel = getRecommendedRescueActionCardModel({
+      sourceLabel: 'Partial DeepBook state',
+      sourceState: 'partial-deepbook',
+      state: {
+        ...mockMarginState,
+        source: 'deepbook',
+        isPartial: true,
+        riskRatio: 1000,
+        debtValueUsd: 0,
+        baseDebt: 0,
+        quoteDebt: 0,
+      },
+    })
+
+    expect(viewModel.title).toBe('No active debt')
+    expect(viewModel.reviewDisabled).toBe(true)
+    expect(JSON.stringify(viewModel)).not.toContain('1000.00')
+    expect(JSON.stringify(viewModel)).not.toContain('Recommended')
+  })
+
+  it('does not infer no-debt when partial debt fields are missing', () => {
+    const viewModel = getRecommendedRescueActionCardModel({
+      sourceLabel: 'Partial DeepBook state',
+      sourceState: 'partial-deepbook',
+      state: {
+        ...mockMarginState,
+        source: 'deepbook',
+        isPartial: true,
+        riskRatio: 1000,
+        debtValueUsd: 0,
+        baseDebt: undefined,
+        quoteDebt: undefined,
+      },
+    })
+
+    expect(viewModel.title).toBe('Recommendation unavailable')
+    expect(viewModel.reviewDisabled).toBe(true)
+    expect(viewModel.bodyLines).toContain('Debt fields are unavailable, so MarginGuard cannot prove this is a no-debt manager.')
+  })
 })

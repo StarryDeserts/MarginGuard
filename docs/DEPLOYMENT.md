@@ -4,6 +4,13 @@ MarginGuard v0 is a static browser app. It should be deployed as static files on
 
 ## Build
 
+Before building public/demo assets in PowerShell, force the safe live-signing-disabled environment:
+
+```powershell
+Remove-Item Env:VITE_ENABLE_LIVE_ADD_COLLATERAL -ErrorAction SilentlyContinue
+$env:VITE_ENABLE_LIVE_ADD_COLLATERAL="false"
+```
+
 ```powershell
 pnpm -C apps/web build
 ```
@@ -26,6 +33,24 @@ Suitable targets include:
 
 Do not add API routes, serverless functions, databases, workers, indexers, keepers, relayers, custody services, or private-key services for deployment.
 
+## Static Preview Smoke
+
+After building, preview the static output locally:
+
+```powershell
+pnpm -C apps/web preview --host 127.0.0.1
+```
+
+Smoke routes:
+
+- `/`
+- `/dashboard`
+- `/rescue`
+- `/demo`
+- `/settings`
+
+Do not mark route smoke as passed from build success alone. Record observed route status in `docs/FINAL_DEMO_QA.md`, or leave it as `Not tested — user manual`.
+
 ## Environment Defaults
 
 Public demo deployments should keep live Add Collateral disabled:
@@ -33,6 +58,8 @@ Public demo deployments should keep live Add Collateral disabled:
 ```text
 VITE_ENABLE_LIVE_ADD_COLLATERAL=false
 ```
+
+If the live flag state is unknown, deployment readiness is blocked until it is confirmed disabled.
 
 The app enables live Add Collateral signing only when:
 

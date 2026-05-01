@@ -76,3 +76,4 @@ If no action-needed manager is available, do not force live execution. Use Demo 
 4. Open Demo Mode and switch between `Simulated Demo Mode` and `Real Manager Baseline + Simulated Shock`.
 5. Confirm shocked price, stressed RR, Add Collateral recommendation, expected after RR, and interest drift are labeled as simulated or estimates.
 6. Confirm no wallet prompt opens from Demo Mode.
+7. Confirm Real Manager Baseline + Simulated Shock is not presented as a live action-needed onchain state.

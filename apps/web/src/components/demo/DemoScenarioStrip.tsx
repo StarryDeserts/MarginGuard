@@ -9,7 +9,11 @@ type DemoScenarioStripProps = {
   startPrice: number
   shockedPrice: number
   startingRiskRatio: number
+  startingRiskRatioDisplay: string
+  startingRiskStateLabel: string
   simulatedRiskRatio: number
+  simulatedRiskRatioDisplay: string
+  simulatedRiskStateLabel: string
   liquidationThreshold: number
   targetRiskRatio: number
   provenanceLabels: {
@@ -28,7 +32,11 @@ export function DemoScenarioStrip({
   startPrice,
   shockedPrice,
   startingRiskRatio,
+  startingRiskRatioDisplay,
+  startingRiskStateLabel,
   simulatedRiskRatio,
+  simulatedRiskRatioDisplay,
+  simulatedRiskStateLabel,
   liquidationThreshold,
   targetRiskRatio,
   provenanceLabels,
@@ -37,8 +45,8 @@ export function DemoScenarioStrip({
     ['Scenario', scenario.title, 'text-sui-cyan', undefined],
     ['Start SUI Price', `${startPrice.toFixed(2)} USDC`, 'text-text-primary', provenanceLabels.startPrice],
     ['Shocked Price', `${shockedPrice.toFixed(2)} USDC`, 'text-warning-orange', provenanceLabels.shockedPrice],
-    ['Starting RR', `${formatRatio(startingRiskRatio)} Guarded`, 'text-guarded-blue', provenanceLabels.startingRiskRatio],
-    ['Stressed RR', `${formatRatio(simulatedRiskRatio)} Warning`, 'text-warning-orange', provenanceLabels.simulatedRiskRatio],
+    ['Starting RR', formatRiskState(startingRiskRatioDisplay, startingRiskStateLabel, startingRiskRatio), 'text-guarded-blue', provenanceLabels.startingRiskRatio],
+    ['Stressed RR', formatRiskState(simulatedRiskRatioDisplay, simulatedRiskStateLabel, simulatedRiskRatio), 'text-warning-orange', provenanceLabels.simulatedRiskRatio],
     ['Liquidation Threshold', formatRatio(liquidationThreshold), 'text-danger-red', provenanceLabels.liquidationThreshold],
     ['Target Rescue Ratio', formatRatio(targetRiskRatio), 'text-safe-green', provenanceLabels.targetRiskRatio],
   ]
@@ -62,4 +70,12 @@ export function DemoScenarioStrip({
       </div>
     </Card>
   )
+}
+
+function formatRiskState(display: string, stateLabel: string, value: number) {
+  const resolvedDisplay = display || formatRatio(value)
+
+  if (stateLabel === 'No active liquidation risk') return resolvedDisplay
+
+  return `${resolvedDisplay} ${stateLabel}`
 }
